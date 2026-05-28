@@ -19,7 +19,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Process a language argument.")
 
-    parser.add_argument("language", type=str, help="The language of the generated data.")
+    parser.add_argument("language", type=str, nargs="?", help="The language of the generated data.",
+                        required=True)
 
     args = parser.parse_args()
 

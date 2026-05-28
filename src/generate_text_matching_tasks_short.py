@@ -15,15 +15,17 @@ def main():
     Your output must always be a python list of strings only, with about 20 elements, and each element corresponds to a distinct
     task in one sentence. Do not explain yourself or output anything else. Be creative!"""
 
-    csv_save_as = f"{variables.text_matching_short_dataset_name}.csv"
-    push_to_hf = True
+    csv_save_as = f"{variables.TEXT_MATCHING_SHORT_DATASET_NAME}.csv"
 
-    generate_task(total_desired_samples=variables.total_desired_tasks,
-                model_id=variables.model_id,
-                prompt=prompt,
-                csv_save_as=csv_save_as,
-                push_to_hf=push_to_hf,
-                hf_dataset_name=f"{variables.hf_user}/{variables.text_matching_short_dataset_name}")
-    
+    generate_task(total_desired_samples=variables.TOTAL_DESIRED_TASKS,
+                  model_id=variables.MODEL_ID,
+                  prompt=prompt,
+                  csv_save_as=csv_save_as,
+                  base_url=variables.BASE_URL,
+                  api_key=variables.API_KEY,
+                  push_to_hf=variables.PUSH_TO_HF,
+                  hf_dataset_name=f"{variables.HF_USER}/{variables.TEXT_MATCHING_SHORT_DATASET_NAME}",
+                  output_dir=variables.OUTPUT_DIR)
+
 if __name__ == "__main__":
     main()

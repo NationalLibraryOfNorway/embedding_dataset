@@ -4,6 +4,7 @@ Table 12: Prompt template for monolingual STS. For placeholders, “{high_score}
 """
 
 from generators import GenerateUnitTriple
+from utils import format_language
 import variables
 import argparse
 
@@ -29,13 +30,16 @@ def main(language: str):
     anything else. Be creative!"""
 
     generator = GenerateUnitTriple(
-        model_id=variables.model_id, 
-        temperature=variables.temperature, 
-        top_p=variables.top_p, 
+        model_id=variables.MODEL_ID,
+        temperature=variables.TEMPERATURE,
+        top_p=variables.TOP_P,
         prompt=prompt, 
         language=language,
         task=task,
-        samples=variables.total_desired_samples,
+        samples=variables.TOTAL_DESIRED_SAMPLES,
+        base_url=variables.BASE_URL,
+        api_key=variables.API_KEY,
+        max_tokens=variables.MAX_TOKENS,
         unit=unit,
         high_score=high_score,
         difficulty=difficulty,
@@ -44,21 +48,17 @@ def main(language: str):
 
     dataset = generator.generate()
 
-    try:
+    lang_slug = format_language(language)
 
-        dataset.to_csv(f"{variables.task_dataset_id_unit_triple}-{language.lower()}.csv", index=False)
+    try:
+        dataset.to_csv(variables.OUTPUT_DIR / f"{variables.TASK_DATASET_ID_UNIT_TRIPLE}-{lang_slug}.csv", index=False)
 
     except Exception as e:
 
-        print(f"could not save {variables.task_dataset_id_unit_triple}.csv")
+        print(f"could not save {variables.TASK_DATASET_ID_UNIT_TRIPLE}-{lang_slug}.csv")
 
-    if variables.push_to_hf:
-
-        if "(" in language or ")" in language:
-        
-            language = language.split("(")[0].strip()
-        
-        dataset.push_to_hub(f"ThatsGroes/{variables.task_dataset_id_unit_triple}-{language.lower()}")
+    if variables.PUSH_TO_HF:
+        dataset.push_to_hub(f"NbAiLab/{variables.TASK_DATASET_ID_UNIT_TRIPLE}-{lang_slug}")
 
 if __name__ == "__main__":
 

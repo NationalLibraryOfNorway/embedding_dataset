@@ -1,0 +1,17 @@
+[project]
+name = "embedding-dataset"
+version = "0.1.0"
+description = "Synthetic embedding dataset generation pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "datasets",
+    "google-auth",
+    "huggingface-hub",
+    "openai",
+    "pandas",
+    "python-dotenv",
+    "torch",
+    "transformers",
+    "vllm",
+]

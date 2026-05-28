@@ -3,10 +3,11 @@ Table 9: Prompt template for the long-short matching subgroup. For placeholders,
 "at least 10", "at least 50", "at least 100", "at least 200"}, “{difficulty}” ∈ {high school, college, PhD}, “{clarity}” ∈
 {clear, understandable with some effort, ambiguous}.
 """
-from datasets import load_dataset
 from generators import GenerateFromTextClassificationTask
 import variables
 import argparse
+
+from utils import load_task_dataset, format_language
 
 
 def main(language: str):
@@ -20,8 +21,7 @@ def main(language: str):
     difficulty = ["high school", "college", "PhD"]
     clarity = ["clear", "understandable with some effort", "ambiguous"]
 
-    task = load_dataset(f"ThatsGroes/{variables.text_classification_task_dataset_name}-processed")
-    task = list(task["train"]["response"])
+    task = load_task_dataset(f"NbAiLab/{variables.TEXT_CLASSIFICATION_TASK_DATASET_NAME}-processed")
 
 
     prompt = f"""You have been assigned a text classification task: {{task}}
@@ -43,12 +43,15 @@ def main(language: str):
     Your output must always be a JSON object only, do not explain yourself or output anything else. Be creative!"""
 
     generator = GenerateFromTextClassificationTask(
-        model_id=variables.model_id, 
-        temperature=variables.temperature, 
-        top_p=variables.top_p, 
+        model_id=variables.MODEL_ID,
+        temperature=variables.TEMPERATURE,
+        top_p=variables.TOP_P,
         prompt=prompt, 
         language=language,
-        samples=variables.total_desired_samples,
+        samples=variables.TOTAL_DESIRED_SAMPLES,
+        base_url=variables.BASE_URL,
+        api_key=variables.API_KEY,
+        max_tokens=variables.MAX_TOKENS,
         task=task,
         num_words=num_words,
         clarity=clarity,
@@ -57,20 +60,18 @@ def main(language: str):
 
     dataset = generator.generate()
 
+    lang_slug = format_language(language)
+
     try:
-        dataset.to_csv(f"{task_dataset_id}-{language.lower()}.csv", index=False)
+        dataset.to_csv(variables.OUTPUT_DIR / f"{task_dataset_id}-{lang_slug}.csv", index=False)
 
     except Exception as e:
 
-        print(f"could not save {variables.task_dataset_id}.csv")
+        print(f"could not save {task_dataset_id}-{lang_slug}.csv")
         print(f"Exception: {e}")
 
-    if variables.push_to_hf:
-
-        if "(" in language or ")" in language:
-            language = language.split("(")[0].strip()
-
-        dataset.push_to_hub(f"ThatsGroes/{task_dataset_id}-{language.lower()}")
+    if variables.PUSH_TO_HF:
+        dataset.push_to_hub(f"NbAiLab/{task_dataset_id}-{lang_slug}")
 
 if __name__ == "__main__":
 

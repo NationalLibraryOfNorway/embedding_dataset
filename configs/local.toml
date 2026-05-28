@@ -1,0 +1,26 @@
+[model]
+model_id = "google/gemma-4-31B-it"
+temperature = 1.0
+top_p = 1.0
+max_tokens = 3072
+
+[server]
+base_url = "http://golem.nb.no:8000/v1"
+api_key = "dummy"
+auth = "api_key"
+
+[huggingface]
+hf_user = "NbAiLab"
+push_to_hf = true
+
+[generation]
+total_desired_samples = 50000
+output_dir = "output/local"
+
+[datasets]
+text_classification_task_dataset_name = "classification-tasks"
+retrieval_task_dataset_name = "retrieval-tasks"
+text_matching_short_dataset_name = "text-matching-short-tasks"
+text_matching_long_dataset_name = "text-matching-long-tasks"
+task_dataset_id_unit_triple = "synthetic-from-unit-triple-tasks"
+

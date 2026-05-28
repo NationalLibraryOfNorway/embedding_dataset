@@ -2,10 +2,11 @@
 Table 8 - retrieval task
 """
 
-from datasets import load_dataset
 from generators import GenerateFromRetrievalTask
 import variables
 import argparse
+
+from utils import load_task_dataset, format_language
 
 
 def main(language: str):
@@ -17,12 +18,10 @@ def main(language: str):
     num_words = ["50", "100", "200", "300", "400", "500"]
     difficulty = ["high school", "college", "PhD"]
     clarity = ["clear", "understandable with some effort", "ambiguous"]
-    task = ["task1", "task2"]
     query_length = ["less than 5 words", "5 to 15 words", "at least 10 words"]
     query_type = ["extremely long-tail", "long-tail", "common"]
 
-    task = load_dataset(f"ThatsGroes/{variables.retrieval_task_dataset_name}-processed")
-    task = list(task["train"]["response"])
+    task = load_task_dataset(f"NbAiLab/{variables.RETRIEVAL_TASK_DATASET_NAME}-processed")
 
 
     prompt = f"""You have been assigned a retrieval task: {{task}}
@@ -45,37 +44,38 @@ def main(language: str):
 
 
     generator = GenerateFromRetrievalTask(
-        model_id=variables.model_id, 
-        temperature=variables.temperature, 
-        top_p=variables.top_p, 
+        model_id=variables.MODEL_ID,
+        temperature=variables.TEMPERATURE,
+        top_p=variables.TOP_P,
         prompt=prompt, 
         language=language,
-        samples=variables.total_desired_samples,
+        samples=variables.TOTAL_DESIRED_SAMPLES,
         task=task,
         clarity=clarity,
         num_words=num_words,
         difficulty=difficulty,
         query_type=query_type,
-        query_length=query_length
+        query_length=query_length,
+        base_url=variables.BASE_URL,
+        api_key=variables.API_KEY,
+        max_tokens=variables.MAX_TOKENS
         )
 
     dataset = generator.generate()
 
+    lang_slug = format_language(language)
+
     try:
-        dataset.to_csv(f"{task_dataset_id}-{language.lower()}.csv", index=False)
+        dataset.to_csv(variables.OUTPUT_DIR / f"{task_dataset_id}-{lang_slug}.csv", index=False)
 
     except Exception as e:
 
-        print(f"could not save {variables.task_dataset_id}-{language.lower()}.csv")
+        print(f"could not save {task_dataset_id}-{lang_slug}.csv")
         print(f"Exception: {e}")
 
-    if variables.push_to_hf:
-        
-        if "(" in language or ")" in language:
-            language = language.split("(")[0].strip()
-    
-        dataset.push_to_hub(f"ThatsGroes/{task_dataset_id}-{language}")
-        
+    if variables.PUSH_TO_HF:
+        dataset.push_to_hub(f"NbAiLab/{task_dataset_id}-{lang_slug}")
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Process a language argument.")
